@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Checks if a number has factors and prints them
+
+check_factor() 
+{
+    if [ $# -ne 3 ]; # Checks that exactly 3 arguments were passed
+        then 
+                args=("$@") # Stores all arguments in an array
+                count=0 
+                num2=1
+                for a in ${args[*]}; # Loops through each argument
+                do
+                        if [ $count -gt 1 ]; # Checks if this is the 2nd argument
+                        then 
+                                num2=$(echo $a*$num2 | bc) # Multiplies the 2nd argument by the previous product
+                        fi
+                        count=$((count + 1)) # Increments the count
+                done
+        else
+                num2=$3 # Sets the 3rd argument as num2
+        fi
+
+        num1=$2 # Sets the 2nd argument as num1
+        num=$(echo "$1" | tr ':' '=') # Replaces : with = in the 1st argument
+
+        result=$(echo "if($num2 > $num1) 1 else 0" | bc) # Checks if num2 > num1
+            if ((result == 1)); then # If so
+                numcp=$num1 # Swaps num1 and num2
+                num1=$num2
+                num2=$numcp
+                fi
+
+        echo "$num$num1*$num2" # Prints the factors in ascending order 
+}
+
+if [ $# -ne 1 ] # Checks that exactly 1 argument (the filename) was passed
+then
+        echo 'Usage: rsa <file>' # Prints usage
+        exit 1 # Exits
+else
+
+        while read i # Reads each line of the file
+        do
+
+                result=$(factor "$i") # Gets the factors of the current number
+                check_factor $result # Passes the factors to the check_factor() function
+
+        done < "$1" # Reads from the file passed as the 1st argument
+fi
+
